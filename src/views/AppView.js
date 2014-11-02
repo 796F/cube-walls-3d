@@ -15,33 +15,33 @@ var Particle = require('famous/physics/bodies/Particle');
 var Circle = require('famous/physics/bodies/Circle');
 var CubicView = require('./CubicView');
 var PhysicsEngine = require('famous/physics/PhysicsEngine');
-// var MouseSync     = require("famous/inputs/MouseSync");
-// var TouchSync     = require("famous/inputs/TouchSync");
-// var ScrollSync    = require("famous/inputs/ScrollSync");
-// var GenericSync   = require("famous/inputs/GenericSync");
+var MouseSync     = require("famous/inputs/MouseSync");
+var TouchSync     = require("famous/inputs/TouchSync");
+var ScrollSync    = require("famous/inputs/ScrollSync");
+var GenericSync   = require("famous/inputs/GenericSync");
 
-// GenericSync.register({
-//     "mouse"  : MouseSync,
-//     "touch"  : TouchSync,
-//     "scroll" : ScrollSync
-// });
+GenericSync.register({
+    "mouse"  : MouseSync,
+    "touch"  : TouchSync,
+    "scroll" : ScrollSync
+});
 
-function AppView() {
+function AppView(Engine) {
     View.apply(this, arguments);
 
-    // this.sync = new GenericSync({
-    //     "mouse"  : {},
-    //     "touch"  : {},
-    //     "scroll" : {scale : .5}
-    // });
+    this.sync = new GenericSync({
+        "mouse"  : {},
+        "touch"  : {},
+        "scroll" : {scale : .5}
+    });
     
     this._physicsEngine = new PhysicsEngine();
 
     this._rotationTransitionable = new Transitionable([0, 0, 0])
 
     this._rotationModifier = new Modifier({
-        // origin: [0.5, 0.5],
-        // align: [0.5, 0.5],
+        origin: [0.5, 0.5],
+        align: [0.5, 0.5],
         transform: function() {
             return Transform.rotate.apply(this, this._rotationTransitionable.get());
         }.bind(this)
@@ -49,20 +49,27 @@ function AppView() {
 
     this._rootNode = this.add(this._rotationModifier);
 
-    var anchor = new Surface({
-      size: [50, 50],
-      properties: {
-        backgroundColor: 'red'
-      }
-    });
-
-    this.add(anchor);
-
     _createBackground.call(this);
     _createCube.call(this);
+    
+    //must create in this order for anchor to sit outside of the walls...
     _createSpheres.call(this);
     _createWalls.call(this);
+    _createAnchor.call(this);
+
     _bindEvents.call(this);
+
+    var rotateAngle = Math.PI/100;
+    if (rotateAngle){
+        var angle = 0
+        Engine.on('prerender', function(){
+            angle += rotateAngle;
+            this._walls.rotateZ(rotateAngle);
+            var old_rotation = this._rotationTransitionable.get();
+            old_rotation[2] += rotateAngle;
+            // .setTransform(Matrix.rotateZ(angle));
+        }.bind(this));
+    };
 }
 
 AppView.prototype = Object.create(View.prototype);
@@ -71,19 +78,50 @@ AppView.prototype.constructor = AppView;
 AppView.DEFAULT_OPTIONS = {};
 
 function _createCube() {
-    // var edgeLength = window.innerWidth < window.innerHeight ? window.innerWidth * 0.5 : window.innerHeight * 0.5;
-    var edgeLength = 500;
+    this.edgeLength = window.innerWidth < window.innerHeight ? window.innerWidth * 0.5 : window.innerHeight * 0.5;
     var cube = new CubicView({
-        edgeLength: edgeLength
+        edgeLength: this.edgeLength
     });
-    // cube.pipe(this.sync);
+    cube.pipe(this.sync);
     this._rootNode.add(cube);
+}
+
+function _createAnchor() {
+    this._anchorParticle = new Circle({
+      radius: 0
+    });
+
+    this._anchorParticle.setPosition([250, 250, 0])
+
+    var anchorModifier = new Modifier({
+        origin: [0.5, 0.5],
+        align: [0.5, 0.5],
+        transform : function() {
+            return this._anchorParticle.getTransform();
+        }.bind(this)
+    });
+
+    var anchor = new Surface({
+      size: [50, 50],
+      properties: {
+        backgroundColor: 'red'
+      }
+    });
+    this._physicsEngine.addBody(this._anchorParticle);
+
+    var gravity = new RepulsionForce({
+        strength: -50
+    });
+
+    this._physicsEngine.attach(gravity, this._spheres, this._anchorParticle);
+
+    this.add(anchorModifier).add(anchor);
 }
 
 function _createWalls() {
     this._walls = new Walls({
         restitution : 0.5,
-        size : [500, 500, 500],
+        size : [this.edgeLength, this.edgeLength, this.edgeLength],
         origin : [0.5, 0.5, 0.5],
         k : 0.5,
         drift : 0.5,
@@ -102,9 +140,9 @@ function _createWalls() {
 function  _createSpheres() {
     
     this.spheres = [];
-    for(var i=0; i<5; i++) {
+    for(var i=0; i<10; i++) {
         var sphere = _createSphere();
-        this._rootNode.add(sphere.modifier).add(sphere.surface);
+        this.add(sphere.modifier).add(sphere.surface);
         this._physicsEngine.addBody(sphere.circle);
         this.spheres.push(sphere.circle);
         
@@ -135,27 +173,22 @@ function  _createSpheres() {
         // sphereParticle.setVelocity(0.2, 0, 0);
         // this._rootNode.add(sphereModifier).add(sphereSurface);
 
-        // var gravity = new RepulsionForce({
-        //     strength: -5
-        // });
-
-        // var gravity = new VectorField({
-        //     strength : 0.005
-        // });
-        // this._physicsEngine.attach(gravity, sphereParticle, anchorParticle);
+        
     }
 
 }
 
 function _createSphere() {
+
+    var size = Math.random() * 20;
     var circle = new Circle({
-      radius: 25
+      radius: 2 * size
     });
 
-    circle.applyForce(new Vector(Math.random() * 0.01, Math.random() * 0.01, 0));
+    // circle.applyForce(new Vector(Math.random() * 1, Math.random() * 1, Math.random() * 1));
 
     var surface = new Surface({
-      size: [50, 50],
+      size: [size, size],
       classes: ['particle'],
       properties: {
         backgroundColor : 'blue'
@@ -165,7 +198,7 @@ function _createSphere() {
     var modifier = new Modifier({
       align: [0.5, 0.5],
       origin: [0.5, 0.5],
-      size: [50, 50],
+
       transform: function() {
         return circle.getTransform();
       }
@@ -182,28 +215,30 @@ function _createBackground() {
     this._backgroundSurface = new Surface({
         size: [undefined, undefined]
     })
-    // this._backgroundSurface.pipe(this.sync);
+    this._backgroundSurface.pipe(this.sync);
     this.add(this._backgroundSurface);
 }
 
 function _bindEvents() {
-    // this.sync.on('start', function(data){
-    //     console.log('start', data.delta);
-    // });
+    this.sync.on('start', function(data){
+        console.log('start', data);
+    });
 
-    // this.sync.on('update', function(data){
-    //     var dX = data.delta[0];
-    //     var dY = data.delta[1];
+    this.sync.on('update', function(data){
+        var dX = data.delta[0];
+        var dY = data.delta[1];
 
-    //     var old_rotation = this._rotationTransitionable.get();
-    //     //clamp for now.  
-    //     if(Math.abs(old_rotation[0] - dY/100) <= 1) old_rotation[0] -= dY/100;
-    //     old_rotation[1] += dX/100;
-    // }.bind(this));
+        var old_rotation = this._rotationTransitionable.get();
+        
+        old_rotation[0] += -dY/100;
+        this._walls.rotateX(-dY/100);
+        old_rotation[1] += dX/100;
+        this._walls.rotateY(dX/100);
+    }.bind(this));
 
-    // this.sync.on('end', function(data){
-    //     console.log('end', data.delta);
-    // });
+    this.sync.on('end', function(data){
+        console.log('end', data);
+    });
 }
 
 module.exports = AppView;

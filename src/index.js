@@ -9,8 +9,8 @@ mainContext.setPerspective(1000);
 
 var camera = new EasyCamera();
 
-var app = new AppView();
-mainContext.add(camera.mod).add(app);
+var app = new AppView(Engine);
+mainContext.add(app);
 
 window.app = app;
 window.context = mainContext;

@@ -59,7 +59,7 @@ CubicView.DEFAULT_OPTIONS = {
 function _createCube() {
     var self = this;
     for(var i=0; i<FACE_ROTATIONS.length; i++){
-        
+
         var face = _createFace.call(this, i);
         var faceModifier = new Modifier({
             opacity: 0.5,
@@ -77,14 +77,14 @@ function _createCube() {
 function _createFace(index) {
     var face = new Surface({
       content: '',
-      classes: ['backfaceVisibility'],
       size: [this.options.edgeLength, this.options.edgeLength],
+      classes : ['backface'],
       properties: {
         textAlign: 'center',
         lineHeight: '70px',
         fontSize: '35px',
-        border: '2px solid black',
-        backgroundColor: 'hsl(' + (index * 20 + 120) + ', 100%, 30%)'
+        background : 'rgba(255,255,255,0.1)',
+        border : '1px solid rgba(255,255,255,1)'
       }
     });
     face.pipe(this._eventOutput);

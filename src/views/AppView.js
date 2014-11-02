@@ -91,7 +91,7 @@ function _createAnchor() {
       radius: 0
     });
 
-    this._anchorParticle.setPosition([250, 250, 0])
+    this._anchorParticle.setPosition([0, 250, 0])
 
     var anchorModifier = new Modifier({
         origin: [0.5, 0.5],
@@ -180,25 +180,23 @@ function  _createSpheres() {
 
 function _createSphere() {
 
-    var size = Math.random() * 20;
-    var circle = new Circle({
-      radius: 2 * size
-    });
+    var size = Math.random() * 90;
 
-    // circle.applyForce(new Vector(Math.random() * 1, Math.random() * 1, Math.random() * 1));
+    var circle = new Circle({
+      radius: size,
+      position: new Vector(0, 0, 0),
+      velocity: new Vector(0, 0, 0)
+    });
 
     var surface = new Surface({
       size: [size, size],
-      classes: ['particle'],
-      properties: {
-        backgroundColor : 'blue'
-      }
+      classes: ['particle']
     });
+    if(Math.random() > 0.5) surface.addClass('color1');
 
     var modifier = new Modifier({
       align: [0.5, 0.5],
       origin: [0.5, 0.5],
-
       transform: function() {
         return circle.getTransform();
       }

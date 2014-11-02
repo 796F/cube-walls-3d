@@ -1,0 +1,38 @@
+day 1
+basic grid layout, custom vs extend?  surfaces ontop. 
+rect prism renderable, create a grid of those in place of the surface.
+
+day 2
+flip patterns
+sizing
+listeneers on each prism, 
+flip and stuff on click.  
+
+start off a mess, onstant moving.  
+tell them to stop all of a sudden.  
+tell them to get in line
+tell them to animate 1
+             animate 2
+tell them to make famous logo
+
+day 3
+get better computer,
+transition proj and demo on it, try to add more surfaces ???
+add background with mouse sync, allow click and drag of scene to adjust angle
+event handling for the on button cube
+
+TIM
+1.  single generic sync for each cubicView, and piping all faces to the single genericSync for each cubic view class. Also, let's get animations on these cubes triggered from the 'start' and 'end' events.
+2.  This halt function isn't a true halt
+3.  real button content we expect to use in the calculator. 
+4.  work on phone and desktop, and the cubes are going to have to resize themselves based on the proportions of the window
+5.  calculator working based on a buffer of keyboard input, as a high priority
+extra - use Timer.js in utilities?  
+
+behind these tiles, are other buttons.  
+cubes, with sides.  tilting to different sides shows different buttons.  
+pressing buttons depresses it, and its reboundaction causes things to flip.  
+
+variable screen size?  maybe i can flip some of the cubes and turn them into part of the screen?  
+monospace font.  
+build html5 calculator...

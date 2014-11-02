@@ -1,0 +1,23 @@
+html {
+  background: #fff;
+}
+
+.backfaceVisibility {
+  -webkit-backface-visibility: visible;
+  backface-visibility: visible;
+}
+
+.sphere{
+    background-image: -webkit-radial-gradient(40% 40%, circle contain, rgba(50,50,50,.4) 10%, rgba(100,100,100,.4) 100%);
+    border-radius : 50%;
+}
+
+.particle{
+    background: rgba(50,210,255,.9);
+    -webkit-box-shadow: inset 3px 3px 5px 2px rgba(187, 211, 255, 0.80), 0px 0px 5px rgba(0,50,255,.9);
+    border-radius: 50%;
+    color : black;
+    font-size: 20px;
+    backface-visibility : visible !important;
+    -webkit-backface-visibility: visible !important;
+}
